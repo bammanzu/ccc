@@ -1,0 +1,55 @@
+아두이노 코드
+
+void setup() {
+  Serial.begin(9600);
+}
+double th(int v) {
+  double t;
+  t = log(((10240000/v) - 10000));
+  t = 1 /(0.001129148 + (0.000234125*t) + (0.0000000876741*t*t*t));
+  t = t - 273.15; 
+  return t;
+}
+void loop() {
+  int temp = analogRead(A0); 
+  int light = analogRead(A1); 
+
+  double temperature = th(temp); 
+  Serial.print("온도: ");
+  Serial.print(temperature);
+  Serial.print("°C, 조도: ");
+  Serial.println(light);
+
+  delay(1000);
+}
+
+프로세싱 코드
+
+import processing.serial.*;
+import processing.net.*;
+Serial p;
+Server s;
+Client c;
+void setup(){
+  p = new Serial(this, "COM4", 9600);
+  s = new Server(this, 12345);
+}
+String m="";
+void draw(){
+  if(p.available()>0){
+    m = p.readStringUntil('\n');
+    if(m!=null){
+      print(m);
+    }
+  }
+  c = s.available();
+  if(c!=null){
+    String w = c.readString();
+    println(w);
+    if (w.indexOf("GET")==0) { 
+      c.write("HTTP/1.1 200 OK\r\n\r\n\r\n"); 
+      c.write(m);
+    }
+    c.stop();
+  }
+}
