@@ -1,0 +1,47 @@
+프로세싱 코드
+
+import processing.serial.*;
+import processing.net.*;
+
+Server s;
+Client c;
+Serial p;
+
+void setup() {
+  p = new Serial(this, "COM9", 9600);
+  s = new Server(this, 12345);
+}
+
+void draw() {
+  c = s.available();
+  if (c != null) {
+    String message = c.readString();
+    message = message.substring(message.length() - 1);  // 마지막 1문자만 추출하기
+    println(message);
+    if (message.equals("0")) {
+      p.write("0");  // 아두이노로 '0'을 보내 LED를 끕니다.
+    } else if (message.equals("1")) {
+      p.write("1");  // 아두이노로 '1'을 보내 LED를 켭니다.
+    }
+  }
+}
+
+아두이노 코드
+
+void setup() {
+  Serial.begin(9600);
+  pinMode(13, OUTPUT);
+}
+
+void loop() {
+  if (Serial.available()) {
+    char command = Serial.read();
+    if (command == '1') {
+      digitalWrite(13, HIGH);  // LED를 켜기
+    } else if (command == '0') {
+      digitalWrite(13, LOW);   // LED를 끄기
+    }
+  }
+}
+
+  
